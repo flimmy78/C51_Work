@@ -1,0 +1,191 @@
+C51 COMPILER V9.01   ADC0832CCN                                                            07/15/2011 11:54:23 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE ADC0832CCN
+OBJECT MODULE PLACED IN ADC0832CCN.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE ADC0832CCN.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          /************************************************
+   2                                                  CAUC
+   3                                                  yeyongan
+   4          *************************************************/
+   5          #include <reg52.h>
+   6          #include <intrins.h>
+   7          #define uchar   unsigned char
+   8          sbit CS=P1^0;                              
+   9          sbit Clk=P1^1;                             //Ê±ÖÓ
+  10          sbit DO=P1^2;                              //ADC0832Êä³öÒý½Å
+  11          sbit DI=P1^3;                              //ADC0832ÊäÈëÒý½Å
+  12          sbit key=P3^3;                             //°´¼ü
+  13          bit keydownflg;                            //²Ù×÷Î»µÄ¶¨Òå
+  14          bit adc_flg;
+  15          uchar dat,channel;                         
+  16          uchar key_buffer;                               
+  17          uchar P2_buffer;                                
+  18          uchar Beep_cnt;
+  19          uchar disp_cnt;
+  20          uchar count4ms;
+  21          uchar disp_buff[5];                      //ÊýÂë¹ÜÏÔÊ¾»º´æ
+  22          uchar code Tab1[]={0xC0,0xF9,0xA4,0xB0,0x99,0x92,0x82,0xF8,0x80,0x90,0x88,0x83,0xA7,0xA1,0x86,0x8E};    //¹²Ñ
+             -ôÊýÂë±í
+  23          uchar code Tab[5]={0x7f,0xbf,0xdf,0xef,0xf7};      //ÊýÂë¹ÜÎ»Ñ¡±í
+  24          
+  25          uchar A_D(uchar CH)                        //ADº¯Êý
+  26          {
+  27   1              uchar i,adval,test;                //¶¨Òå¾Ö²¿±äÁ¿²¢³õÊ¼»¯
+  28   1              adval=0x00;
+  29   1              test=0x00;
+  30   1              Clk=0;                                     //clkµÍµçÆ½
+  31   1              DI=1;                                      //DI³õÊ¼¸ßµçÆ½ÔÚµÚÒ»¸öÊ±ÖÓÂö³åµÄÏÂ½µÑØÇ°±£³Ö¸ßµçÆ½£¬±íÊ¾Æô¶¯ÐÅºÅ
+  32   1              _nop_();                                   
+  33   1              CS=0;                                      //Æ¬Ñ¡
+  34   1              _nop_();
+  35   1              Clk=1;                                     //clkÉÏÉýÑØ£¬ÆðÊ¼Î»Ð´Èë
+  36   1              _nop_();
+  37   1              if(CH==0x00)                       //Ñ¡ÔñÍ¨µÀ0
+  38   1              {
+  39   2                      Clk=0;                                  //clkµÍµçÆ½
+  40   2                       DI=1;                                  
+  41   2                      _nop_();
+  42   2                      Clk=1;                                  //clkÉÏÉýÑØ£¬Í¨µÀ0µÄµÚÒ»Î»Ð´Èë
+  43   2                      _nop_();
+  44   2                      Clk=0;
+  45   2                      DI=0;
+  46   2                      _nop_();
+  47   2                      Clk=1;                                  //clkÉÏÉýÑØ£¬Í¨µÀ0µÄµÚ¶þÎ»Ð´Èë
+  48   2                      _nop_();
+  49   2              }
+  50   1              else
+  51   1              {
+  52   2                      Clk=0;
+  53   2                      DI=1;
+  54   2                      _nop_();
+C51 COMPILER V9.01   ADC0832CCN                                                            07/15/2011 11:54:23 PAGE 2   
+
+  55   2                      Clk=1;                             //clkÉÏÉýÑØ£¬Í¨µÀ1µÄµÚÒ»Î»Ð´Èë
+  56   2                      _nop_();
+  57   2                      Clk=0;
+  58   2                      DI=1;
+  59   2                      _nop_();                           //clkÉÏÉýÑØ£¬Í¨µÀ1µÄµÚ¶þÎ»Ð´Èë
+  60   2                      Clk=1;
+  61   2                      _nop_();
+  62   2              }
+  63   1              Clk=0;
+  64   1              DI=1;
+  65   1              for(i=0;i<8;i++)                         //´Ó¸ßÎ»ÏòµÍÎ»¶ÁÈ¡°ËÎ»ADÖµ
+  66   1              {
+  67   2                      _nop_();
+  68   2                      adval<<=1;
+  69   2                      Clk=1;
+  70   2                      _nop_();
+  71   2                      Clk=0;
+  72   2                      if(DO)
+  73   2                              adval|=0x01;
+  74   2                      else
+  75   2                              adval|=0x00;
+  76   2              }
+  77   1              for(i=0;i<8;i++)
+  78   1              {
+  79   2                      
+  80   2                      test>>=1;                                  //´ÓµÍÎ»Ïò¸ßÎ»¶ÁÈ¡°ËÎ»ADÖµ
+  81   2                      
+  82   2                      if(DO)
+  83   2                              test|=0x80;     
+  84   2                      else                    
+  85   2                              test|=0x00;
+  86   2                              _nop_();
+  87   2                              Clk=1;
+  88   2                              _nop_();
+  89   2                              Clk=0;
+  90   2              }
+  91   1              if(adval==test) dat=test;                       //ÅÐ¶ÏÁ½¸ö¶ÁÈ¡ÖµÊÇ·ñÏàµÈÏàµÈ¾Í°Ñ¶ÁÈ¡µÄÊý¸³Öµ¸øDAT
+  92   1              _nop_();
+  93   1              CS=1;
+  94   1              DO=1;
+  95   1              Clk=1;
+  96   1              return dat;
+  97   1      }                               
+  98          void FillDispBuffer(void)                                               //ÊýÂë¹ÜÏÔÊ¾»º´æº¯Êý
+  99          {
+ 100   1              disp_buff[0]=channel;                                           //ÏÔÊ¾Í¨µÀ
+ 101   1              disp_buff[1]=12;                                                        //ÏÔÊ¾"C"
+ 102   1              disp_buff[2]=dat/51;                                            //ÏÔÊ¾¸öÎ»
+ 103   1              disp_buff[3]=dat%51*10/51;                                      //ÏÔÊ¾Ê®·ÖÎ»
+ 104   1              disp_buff[4]=((dat%51)*10%51)*10/51;            //ÏÔÊ¾°Ù·ÖÎ»
+ 105   1              
+ 106   1      }
+ 107          void dealkey(void)                                                              //°´¼ü´¦Àí
+ 108          {
+ 109   1              if(keydownflg)  return;                                         //keydownflg¿ØÖÆÎ»Îª1£¬²»¶Ô°´¼ü½øÐÐ´¦Àí
+ 110   1              key_buffer=P2;
+ 111   1              if((key_buffer&0x80)!=0x80)     channel=0;              //Ñ¡ÔñÍ¨µÀ0
+ 112   1              if((key_buffer&0x40)!=0x40)     channel=1;              //Ñ¡ÔñÍ¨µÀ1
+ 113   1              FillDispBuffer();                                                       //ÊýÂë¹ÜÏÔÊ¾»º´æ
+ 114   1              Beep_cnt=0;
+ 115   1              keydownflg=1;                                                           //keydownflg¿ØÖÆÎ»ÖÃ1
+ 116   1      }
+C51 COMPILER V9.01   ADC0832CCN                                                            07/15/2011 11:54:23 PAGE 3   
+
+ 117          void main(void)                    //Ö÷º¯Êý
+ 118          {
+ 119   1              P0=0xff;                           //³õÊ¼»¯
+ 120   1              P2=0xff;
+ 121   1              dat=0x00;
+ 122   1              disp_cnt=0;
+ 123   1              count4ms=0;
+ 124   1              channel=0;
+ 125   1              TMOD=0x10;
+ 126   1              TH0=(65535-4000)/256;
+ 127   1              TL0=(65535-4000)%256;
+ 128   1              EA=1;
+ 129   1              TR0=1;
+ 130   1              ET0=1;
+ 131   1              while(1)
+ 132   1              {
+ 133   2                      
+ 134   2                      if(adc_flg)                      //ADC×ª»»¿ØÖÆÎ»£¬·ÀÖ¹ÊäÈëÓëÊä³ö²úÉú³åÍ»
+ 135   2                      {
+ 136   3                              adc_flg=0;
+ 137   3                              A_D(channel);    //ADCº¯Êý
+ 138   3                              FillDispBuffer();       //ÊýÂë¹ÜÏÔÊ¾»º´æ
+ 139   3                      }
+ 140   2                      if(!key)                                //°´¼ü
+ 141   2                              dealkey();
+ 142   2              }
+ 143   1      }
+ 144          void T0_service(void) interrupt 1               //¶¨Ê±Æ÷0ÖÐ¶Ï×Óº¯Êý
+ 145          {
+ 146   1              TH0=(65535-4000)/256;
+ 147   1              TL0=(65535-4000)%256;
+ 148   1              P2_buffer=Tab[disp_cnt];                         //²é±í£¬ÊýÂë¹ÜµÄÎ»Ñ¡Ôñ
+ 149   1      
+ 150   1              P2=P2_buffer;                                             //ÊýÂë¹ÜÏÔÊ¾Êý×Ö·ûºÅ
+ 151   1              if(disp_cnt==2)                                           //µÚÈýÎ»ÊýÂë¹ÜÏÔÊ¾Ð¡Êýµã
+ 152   1                      P0=Tab1[disp_buff[disp_cnt]]&0x7f;
+ 153   1              else
+ 154   1                      P0=Tab1[disp_buff[disp_cnt]];
+ 155   1              disp_cnt++;                                                        //
+ 156   1              if(disp_cnt==5) disp_cnt=0;
+ 157   1              count4ms++;
+ 158   1              if(count4ms==50)                                         //0.2s ADC×ª»»Ò»´Î
+ 159   1              {
+ 160   2                      adc_flg=1;
+ 161   2                      count4ms=0;
+ 162   2              }
+ 163   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    360    ----
+   CONSTANT SIZE    =     21    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     12    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      2    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

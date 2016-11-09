@@ -1,0 +1,36 @@
+C51 COMPILER V9.01   18B20TEST                                                             07/17/2011 14:46:03 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE 18B20TEST
+OBJECT MODULE PLACED IN 18B20TEST.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE 18B20TEST.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include <reg52.h>        //  包含51单片机寄存器定义的头文件
+   2          #include <intrins.h>      //包含_nop_()函数定义的头文件
+   3          unsigned char code table[]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90};//定义共阳数码管显示字型码 
+   4          #define uchar unsigned char
+   5          #define uint  unsigned int
+   6          
+   7          main()
+   8          {
+   9   1              while(1)
+  10   1              {
+  11   2                      P1=0x0a;
+  12   2              }
+  13   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =      5    ----
+   CONSTANT SIZE    =     10    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

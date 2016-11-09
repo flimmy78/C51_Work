@@ -1,0 +1,248 @@
+BL51 BANKED LINKER/LOCATER V6.00                                                        06/29/2011  23:34:11  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.00, INVOKED BY:
+C:\KEIL\C51\BIN\BL51.EXE STARTUP.obj, Text3.obj TO guangmin RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  STARTUP.obj (?C_STARTUP)
+  Text3.obj (TEXT3)
+
+
+LINK MAP OF MODULE:  guangmin (?C_STARTUP)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+                    0008H     0018H                  *** GAP ***
+            BIT     0020H.0   0000H.1   UNIT         ?BI?ASK?TEXT3
+                    0020H.1   0000H.7                *** GAP ***
+            IDATA   0021H     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+                    0003H     07FDH                  *** GAP ***
+            CODE    0800H     0016H     UNIT         ?PR?_WRITECURRENT?TEXT3
+            CODE    0816H     0015H     UNIT         ?PR?READDATA?TEXT3
+            CODE    082BH     0012H     UNIT         ?PR?ASK?TEXT3
+            CODE    083DH     0012H     UNIT         ?PR?READCURRENT?TEXT3
+            CODE    084FH     0011H     UNIT         ?PR?STOP?TEXT3
+            CODE    0860H     000FH     UNIT         ?PR?START?TEXT3
+            CODE    086FH     000CH     UNIT         ?C_C51STARTUP
+            CODE    087BH     000AH     UNIT         ?CO?TEXT3
+            CODE    0885H     0006H     UNIT         ?PR?SLEEP?TEXT3
+            CODE    088BH     0001H     UNIT         ?PR?MAIN?TEXT3
+            CODE    088CH     0001H     UNIT         ?PR?CONTROL?TEXT3
+
+
+
+OVERLAY MAP OF MODULE:   guangmin (?C_STARTUP)
+
+
+SEGMENT
+  +--> CALLED SEGMENT
+---------------------
+?C_C51STARTUP
+  +--> ?PR?MAIN?TEXT3
+
+
+
+SYMBOL TABLE OF MODULE:  guangmin (?C_STARTUP)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+BL51 BANKED LINKER/LOCATER V6.00                                                      06/29/2011  23:34:11  PAGE 2
+
+
+  -------         MODULE        ?C_STARTUP
+  C:086FH         SEGMENT       ?C_C51STARTUP
+  I:0021H         SEGMENT       ?STACK
+  C:0000H         PUBLIC        ?C_STARTUP
+  D:00E0H         SYMBOL        ACC
+  D:00F0H         SYMBOL        B
+  D:0083H         SYMBOL        DPH
+  D:0082H         SYMBOL        DPL
+  N:0000H         SYMBOL        IBPSTACK
+  N:0100H         SYMBOL        IBPSTACKTOP
+  N:0080H         SYMBOL        IDATALEN
+  C:0872H         SYMBOL        IDATALOOP
+  N:0000H         SYMBOL        PBPSTACK
+  N:0100H         SYMBOL        PBPSTACKTOP
+  N:0000H         SYMBOL        PDATALEN
+  N:0000H         SYMBOL        PDATASTART
+  N:0000H         SYMBOL        PPAGE
+  N:0000H         SYMBOL        PPAGEENABLE
+  D:00A0H         SYMBOL        PPAGE_SFR
+  D:0081H         SYMBOL        SP
+  C:086FH         SYMBOL        STARTUP1
+  N:0000H         SYMBOL        XBPSTACK
+  N:0000H         SYMBOL        XBPSTACKTOP
+  N:0000H         SYMBOL        XDATALEN
+  N:0000H         SYMBOL        XDATASTART
+  C:0000H         LINE#         126
+  C:086FH         LINE#         133
+  C:0871H         LINE#         134
+  C:0872H         LINE#         135
+  C:0873H         LINE#         136
+  C:0875H         LINE#         185
+  C:0878H         LINE#         196
+  -------         ENDMOD        ?C_STARTUP
+
+  -------         MODULE        TEXT3
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:00B0H         PUBLIC        P3
+  C:088CH         PUBLIC        control
+  C:087BH         PUBLIC        table
+  C:0885H         PUBLIC        sleep
+  C:082BH         PUBLIC        Ask
+  C:088BH         PUBLIC        main
+  C:0860H         PUBLIC        start
+  C:084FH         PUBLIC        stop
+  C:0800H         PUBLIC        _WriteCurrent
+  B:00B0H.2       PUBLIC        Sclock
+  C:083DH         PUBLIC        ReadCurrent
+  B:00B0H.3       PUBLIC        Sdata
+  C:0816H         PUBLIC        ReadData
+  -------         PROC          _WRITECURRENT
+  D:0007H         SYMBOL        y
+  -------         DO            
+  D:0006H         SYMBOL        i
+  -------         ENDDO         
+  C:0800H         LINE#         12
+  C:0800H         LINE#         13
+  C:0800H         LINE#         15
+BL51 BANKED LINKER/LOCATER V6.00                                                      06/29/2011  23:34:11  PAGE 3
+
+
+  C:0802H         LINE#         16
+  C:0802H         LINE#         17
+  C:0806H         LINE#         19
+  C:0807H         LINE#         20
+  C:0809H         LINE#         21
+  C:080AH         LINE#         22
+  C:080BH         LINE#         24
+  C:080DH         LINE#         25
+  C:0811H         LINE#         27
+  C:0815H         LINE#         28
+  -------         ENDPROC       _WRITECURRENT
+  -------         PROC          SLEEP
+  C:0885H         LINE#         33
+  C:0885H         LINE#         34
+  C:0885H         LINE#         35
+  C:0886H         LINE#         36
+  C:0887H         LINE#         37
+  C:0888H         LINE#         38
+  C:0889H         LINE#         39
+  C:088AH         LINE#         40
+  -------         ENDPROC       SLEEP
+  -------         PROC          MAIN
+  C:088BH         LINE#         41
+  C:088BH         LINE#         42
+  C:088BH         LINE#         45
+  -------         ENDPROC       MAIN
+  -------         PROC          START
+  C:0860H         LINE#         46
+  C:0860H         LINE#         47
+  C:0860H         LINE#         48
+  C:0862H         LINE#         49
+  C:0864H         LINE#         50
+  C:0867H         LINE#         51
+  C:0869H         LINE#         52
+  C:086CH         LINE#         53
+  C:086EH         LINE#         54
+  -------         ENDPROC       START
+  -------         PROC          CONTROL
+  C:088CH         LINE#         56
+  C:088CH         LINE#         57
+  C:088CH         LINE#         59
+  -------         ENDPROC       CONTROL
+  -------         PROC          STOP
+  C:084FH         LINE#         62
+  C:084FH         LINE#         63
+  C:084FH         LINE#         64
+  C:0851H         LINE#         65
+  C:0853H         LINE#         66
+  C:0856H         LINE#         67
+  C:0858H         LINE#         68
+  C:085BH         LINE#         69
+  C:085DH         LINE#         70
+  C:085FH         LINE#         71
+  -------         ENDPROC       STOP
+  -------         PROC          ASK
+  -------         DO            
+  B:0020H.0       SYMBOL        ack_bit
+BL51 BANKED LINKER/LOCATER V6.00                                                      06/29/2011  23:34:11  PAGE 4
+
+
+  -------         ENDDO         
+  C:082BH         LINE#         74
+  C:082BH         LINE#         75
+  C:082BH         LINE#         77
+  C:082DH         LINE#         79
+  C:082EH         LINE#         80
+  C:082FH         LINE#         81
+  C:0831H         LINE#         82
+  C:0834H         LINE#         83
+  C:0838H         LINE#         85
+  C:083AH         LINE#         86
+  C:083CH         LINE#         90
+  -------         ENDPROC       ASK
+  -------         PROC          READDATA
+  -------         DO            
+  D:0006H         SYMBOL        i
+  D:0007H         SYMBOL        x
+  -------         ENDDO         
+  C:0816H         LINE#         92
+  C:0816H         LINE#         94
+  C:0816H         LINE#         97
+  C:0818H         LINE#         98
+  C:0818H         LINE#         99
+  C:081AH         LINE#         100
+  C:081EH         LINE#         101
+  C:0824H         LINE#         102
+  C:0826H         LINE#         103
+  C:082AH         LINE#         104
+  C:082AH         LINE#         105
+  -------         ENDPROC       READDATA
+  -------         PROC          READCURRENT
+  -------         DO            
+  D:0007H         SYMBOL        x
+  -------         ENDDO         
+  C:083DH         LINE#         107
+  C:083DH         LINE#         108
+  C:083DH         LINE#         110
+  C:0840H         LINE#         111
+  C:0845H         LINE#         112
+  C:0848H         LINE#         113
+  C:084BH         LINE#         114
+  C:084EH         LINE#         115
+  C:084EH         LINE#         116
+  -------         ENDPROC       READCURRENT
+  -------         ENDMOD        TEXT3
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?CONTROL?TEXT3
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?READCURRENT?TEXT3
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?CO?TEXT3
+
+******************************************************************************
+* RESTRICTED VERSION WITH 0800H BYTE CODE SIZE LIMIT; USED: 0090H BYTE ( 7%) *
+BL51 BANKED LINKER/LOCATER V6.00                                                      06/29/2011  23:34:11  PAGE 5
+
+
+******************************************************************************
+
+Program Size: data=9.1 xdata=0 code=144
+LINK/LOCATE RUN COMPLETE.  3 WARNING(S),  0 ERROR(S)

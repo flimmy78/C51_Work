@@ -1,0 +1,4 @@
+"STARTUP.obj",
+"L298N.obj" 
+TO "L298N" 
+RAMSIZE(256) 

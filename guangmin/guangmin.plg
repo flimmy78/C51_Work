@@ -1,0 +1,126 @@
+<html>
+<body>
+<pre>
+<h1>礦ision3 Build Log</h1>
+<h2>Project:</h2>
+D:\51\光盘\RZ-51V20开发板配套视频教程\guangmin\guangmin.uv2
+Project File Date:  06/29/2011
+
+<h2>Output:</h2>
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling Text3.c...
+TEXT3.C(4): error C129: missing ';' before 'Sclock'
+Target not created
+Build target 'Target 1'
+compiling Text3.c...
+TEXT3.C(7): error C129: missing ';' before 'Sclock'
+Target not created
+Build target 'Target 1'
+compiling Text3.c...
+TEXT3.C(7): error C129: missing ';' before 'Sclock'
+Target not created
+Build target 'Target 1'
+compiling Text3.c...
+TEXT3.C(15): error C202: 'Sclock': undefined identifier
+TEXT3.C(16): error C202: 'Sdata': undefined identifier
+Target not created
+Build target 'Target 1'
+compiling Text3.c...
+TEXT3.C(10): error C202: 'Sbit': undefined identifier
+TEXT3.C(10): error C141: syntax error near 'Sclock'
+TEXT3.C(11): error C202: 'Sbit': undefined identifier
+TEXT3.C(11): error C141: syntax error near 'Sdata'
+TEXT3.C(16): error C202: 'Sclock': undefined identifier
+TEXT3.C(17): error C202: 'Sdata': undefined identifier
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling Text3.c...
+TEXT3.C(20): warning C206: 'sleep': missing function-prototype
+TEXT3.C(31): error C231: 'sleep': redefinition
+TEXT3.C(37): error C231: 'sleep': redefinition
+Target not created
+Build target 'Target 1'
+compiling Text3.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?START?TEXT3
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?CONTROL?TEXT3
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?STOP?TEXT3
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?ASK?TEXT3
+Program Size: data=9.1 xdata=0 code=73
+"guangmin" - 0 Error(s), 4 Warning(s).
+Build target 'Target 1'
+compiling Text3.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?SLEEP?TEXT3
+Program Size: data=9.0 xdata=0 code=22
+"guangmin" - 0 Error(s), 1 Warning(s).
+Build target 'Target 1'
+compiling Text3.c...
+linking...
+Program Size: data=12.2 xdata=0 code=510
+"guangmin" - 0 Error(s), 0 Warning(s).
+Build target 'Target 1'
+compiling Text3.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?START?TEXT3
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?CONTROL?TEXT3
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?STOP?TEXT3
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?ASK?TEXT3
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?CO?TEXT3
+Program Size: data=9.1 xdata=0 code=83
+"guangmin" - 0 Error(s), 5 Warning(s).
+Build target 'Target 1'
+compiling Text3.c...
+TEXT3.C(33): warning C206: 'start': missing function-prototype
+TEXT3.C(35): warning C206: 'Ask': missing function-prototype
+TEXT3.C(36): warning C206: 'ReadData': missing function-prototype
+TEXT3.C(37): warning C206: 'stop': missing function-prototype
+TEXT3.C(57): error C231: 'start': redefinition
+TEXT3.C(64): error C231: 'start': redefinition
+TEXT3.C(73): error C231: 'stop': redefinition
+TEXT3.C(81): error C231: 'stop': redefinition
+TEXT3.C(85): error C231: 'Ask': redefinition
+TEXT3.C(100): error C231: 'Ask': redefinition
+Target not created
+Build target 'Target 1'
+compiling Text3.c...
+TEXT3.C(98): warning C206: 'ReadData': missing function-prototype
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?CONTROL?TEXT3
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?READCURRENT?TEXT3
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?CO?TEXT3
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  READDATA
+    MODULE:  Text3.obj (TEXT3)
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  READDATA
+    MODULE:  Text3.obj (TEXT3)
+    ADDRESS: 0834H
+Program Size: data=9.1 xdata=0 code=123
+"guangmin" - 0 Error(s), 6 Warning(s).
+Build target 'Target 1'
+compiling Text3.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?CONTROL?TEXT3
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?READCURRENT?TEXT3
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?CO?TEXT3
+Program Size: data=9.1 xdata=0 code=144
+"guangmin" - 0 Error(s), 3 Warning(s).

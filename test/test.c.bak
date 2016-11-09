@@ -1,0 +1,57 @@
+#define LEDS 6
+#include "reg51.h"
+//led灯选通信号
+unsigned char code Select[]={0x01,0x02,0x04,0x08,0x10,0x20};
+unsigned char code LED_CODES[]=
+ {  0xc0,0xF9,0xA4,0xB0,0x99,//0-4
+      0x92,0x82,0xF8,0x80,0x90,//5-9
+	  0x88,0x83,0xC6,0xA1,0x86,//A,b,C,d,E
+	  0x8E,0xFF,0x0C,0x89,0x7F,0xBF//F,空格,P,H,.,-  
+	  };
+sbit  ST_CLK=P1^7;
+sbit  SH_CLK=P1^6;
+sbit  MOSIO=P1^0;
+unsigned char i;
+unsigned char x=0;
+
+void send_data(unsigned char dat) 　　
+{ 　　
+	 　　
+	
+	for(i=0;i<8;i++) //发送一个八位数据 　　
+	{
+		  if(((dat<<=x)&0x80)==0)
+		  {
+			MOSIO=0;//第i位为0时，MOSIO发送0　0　
+		  }else{
+		  	MOSIO=1;//否则发送1
+		  }
+		　SH_CLK=0; /SH_CLK的上升沿，将数据送进移位寄存器 　　
+		  SH_CLK=1;
+		  x=x+1;
+	} 　　ST_CLK=0;//ST_CLK的上升沿，将数据由移位寄存器送到存储寄存器 　　	
+	
+	ST_CLK=1;
+}
+
+void main()
+{
+ char p=0;
+ long int j;
+ while(1)
+ {
+  P2=0;
+  P3=LED_CODES[p];
+  //P2=Select[i];
+  send_data(Select[p]);
+
+
+  for(j=15000;j>0;j--);   //该LED模型靠脉冲点亮，第i位靠脉冲点亮后，会自动熄来头。
+//修改循环次数，改变点亮下一位之前的延时，可得到不同的显示效果。
+  p++;
+  if(p>5) p=0;
+ }
+}
+
+
+

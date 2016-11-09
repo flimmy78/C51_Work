@@ -1,0 +1,504 @@
+C51 COMPILER V9.01   CONTROL                                                               06/10/2012 12:11:26 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE CONTROL
+OBJECT MODULE PLACED IN control.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE control.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include <reg52.h>        //  °üº¬51µ¥Æ¬»ú¼Ä´æÆ÷¶¨ÒåµÄÍ·ÎÄ¼þ
+   2          #include <intrins.h>      //°üº¬_nop_()º¯Êý¶¨ÒåµÄÍ·ÎÄ¼þ
+   3          #include <api.h>
+   4          #include <uart.h>
+   5          sbit p10 = P2^0;
+   6          sbit p11 = P2^1;
+   7          sbit p12 = P2^2;
+   8          sbit p13 = P2^3;
+   9          uchar j = 0;
+  10          uint count=1000;
+  11          uchar cmd;
+  12          uchar turn=0;
+  13          uchar left=0;
+  14          uchar right=0;
+  15          int loop=0;
+  16          int error=0;
+  17          //uchar val[] = {0x40,0x40,0x40,0x40,0x40,0};
+  18          /********************NRF24L10³ÌÐò¿ªÊ¼******************************/
+  19          #define TX_ADR_WIDTH   4  // 4×Ö½Ú¿í¶ÈµÄ·¢ËÍ/½ÓÊÕµØÖ·
+  20          #define TX_PLOAD_WIDTH 20  // Êý¾ÝÍ¨µÀÓÐÐ§Êý¾Ý¿í¶È£¨fifo×Ö½Ú£©
+  21          
+  22          uchar code TX_ADDRESS[TX_ADR_WIDTH] = {0xC0,0xEE,0xD2,0xA2};  // ¶¨ÒåÒ»¸ö¾²Ì¬·¢ËÍµØÖ·
+  23          uchar RX_BUF[TX_PLOAD_WIDTH];
+  24          uchar TX_BUF[TX_PLOAD_WIDTH];
+  25          uchar flag;
+  26          uchar DATA = 0x26;
+  27          uchar bdata sta;
+  28          sbit  RX_DR      = sta^6;
+  29          sbit  TX_DS      = sta^5;
+  30          sbit  MAX_RT = sta^4;
+  31          char  delay = 1500;
+  32          /**************************************************/
+  33          
+  34          /**************************************************
+  35          º¯Êý: init_io()
+  36          
+  37          ÃèÊö:
+  38              ³õÊ¼»¯IO
+  39          /**************************************************/
+  40          void init_io(void)
+  41          {
+  42   1              CE  = 0;        // ´ý»ú
+  43   1              CSN = 1;        // SPI½ûÖ¹
+  44   1              SCK = 0;        // SPIÊ±ÖÓÖÃµÍ
+  45   1              IRQ = 1;        // ÖÐ¶Ï¸´Î»
+  46   1      }
+  47          /**************************************************/
+  48          
+  49          /**************************************************
+  50          º¯Êý£ºdelay_ms()
+  51          
+  52          ÃèÊö£º
+  53              ÑÓ³ÙxºÁÃë
+  54          /**************************************************/
+  55          void delay_ms(uchar x)
+C51 COMPILER V9.01   CONTROL                                                               06/10/2012 12:11:26 PAGE 2   
+
+  56          {
+  57   1          uchar i, j;
+  58   1          i = 0;
+  59   1          for(i=0; i<x; i++)
+  60   1          {
+  61   2             j = 250;
+  62   2             while(--j);
+  63   2                 j = 250;
+  64   2             while(--j);
+  65   2          }
+  66   1      }
+  67          /**************************************************/
+  68          
+  69          /**************************************************
+  70          º¯Êý£ºSPI_RW()
+  71          
+  72          ÃèÊö£º
+  73              ¸ù¾ÝSPIÐ­Òé£¬Ð´Ò»×Ö½ÚÊý¾Ýµ½nRF24L01£¬Í¬Ê±´ÓnRF24L01
+  74                  ¶Á³öÒ»×Ö½Ú
+  75          /**************************************************/
+  76          uchar SPI_RW(uchar byte)
+  77          {
+  78   1              uchar i;
+  79   1              for(i=0; i<8; i++)          // Ñ­»·8´Î
+  80   1              {
+  81   2                      MOSI = (byte & 0x80);   // byte×î¸ßÎ»Êä³öµ½MOSI
+  82   2                      byte <<= 1;             // µÍÒ»Î»ÒÆÎ»µ½×î¸ßÎ»
+  83   2                      SCK = 1;                // À­¸ßSCK£¬nRF24L01´ÓMOSI¶ÁÈë1Î»Êý¾Ý£¬Í¬Ê±´ÓMISOÊä³ö1Î»Êý¾Ý
+  84   2                      byte |= MISO;           // ¶ÁMISOµ½byte×îµÍÎ»
+  85   2                      SCK = 0;                // SCKÖÃµÍ
+  86   2              }
+  87   1          return(byte);               // ·µ»Ø¶Á³öµÄÒ»×Ö½Ú
+  88   1      }
+  89          /**************************************************/
+  90          
+  91          /**************************************************
+  92          º¯Êý£ºSPI_RW_Reg()
+  93          
+  94          ÃèÊö£º
+  95              Ð´Êý¾Ývalueµ½reg¼Ä´æÆ÷
+  96          /**************************************************/
+  97          uchar SPI_RW_Reg(uchar reg, uchar value)
+  98          {
+  99   1              uchar status;
+ 100   1              CSN = 0;                   // CSNÖÃµÍ£¬¿ªÊ¼´«ÊäÊý¾Ý
+ 101   1              status = SPI_RW(reg);      // Ñ¡Ôñ¼Ä´æÆ÷£¬Í¬Ê±·µ»Ø×´Ì¬×Ö
+ 102   1              SPI_RW(value);             // È»ºóÐ´Êý¾Ýµ½¸Ã¼Ä´æÆ÷
+ 103   1              CSN = 1;                   // CSNÀ­¸ß£¬½áÊøÊý¾Ý´«Êä
+ 104   1              return(status);            // ·µ»Ø×´Ì¬¼Ä´æÆ÷
+ 105   1      }
+ 106          /**************************************************/
+ 107          
+ 108          /**************************************************
+ 109          º¯Êý£ºSPI_Read()
+ 110          
+ 111          ÃèÊö£º
+ 112              ´Óreg¼Ä´æÆ÷¶ÁÒ»×Ö½Ú
+ 113          /**************************************************/
+ 114          uchar SPI_Read(uchar reg)
+ 115          {
+ 116   1              uchar reg_val;
+ 117   1              CSN = 0;                    // CSNÖÃµÍ£¬¿ªÊ¼´«ÊäÊý¾Ý
+C51 COMPILER V9.01   CONTROL                                                               06/10/2012 12:11:26 PAGE 3   
+
+ 118   1              SPI_RW(reg);                // Ñ¡Ôñ¼Ä´æÆ÷
+ 119   1              reg_val = SPI_RW(0);        // È»ºó´Ó¸Ã¼Ä´æÆ÷¶ÁÊý¾Ý
+ 120   1              CSN = 1;                    // CSNÀ­¸ß£¬½áÊøÊý¾Ý´«Êä
+ 121   1              return(reg_val);            // ·µ»Ø¼Ä´æÆ÷Êý¾Ý
+ 122   1      }
+ 123          /**************************************************/
+ 124          
+ 125          /**************************************************
+ 126          º¯Êý£ºSPI_Read_Buf()
+ 127          
+ 128          ÃèÊö£º
+ 129              ´Óreg¼Ä´æÆ÷¶Á³öbytes¸ö×Ö½Ú£¬Í¨³£ÓÃÀ´¶ÁÈ¡½ÓÊÕÍ¨µÀ
+ 130                  Êý¾Ý»ò½ÓÊÕ/·¢ËÍµØÖ·
+ 131          /**************************************************/
+ 132          uchar SPI_Read_Buf(uchar reg, uchar * pBuf, uchar bytes)
+ 133          {
+ 134   1              uchar status, i;
+ 135   1              CSN = 0;                    // CSNÖÃµÍ£¬¿ªÊ¼´«ÊäÊý¾Ý
+ 136   1              status = SPI_RW(reg);       // Ñ¡Ôñ¼Ä´æÆ÷£¬Í¬Ê±·µ»Ø×´Ì¬×Ö
+ 137   1              for(i=0; i<bytes; i++)
+ 138   1              pBuf[i] = SPI_RW(0);    // Öð¸ö×Ö½Ú´ÓnRF24L01¶Á³ö
+ 139   1              CSN = 1;                    // CSNÀ­¸ß£¬½áÊøÊý¾Ý´«Êä
+ 140   1              return(status);             // ·µ»Ø×´Ì¬¼Ä´æÆ÷
+ 141   1      }
+ 142          /**************************************************/
+ 143          
+ 144          /**************************************************
+ 145          º¯Êý£ºSPI_Write_Buf()
+ 146          
+ 147          ÃèÊö£º
+ 148              °ÑpBuf»º´æÖÐµÄÊý¾ÝÐ´Èëµ½nRF24L01£¬Í¨³£ÓÃÀ´Ð´Èë·¢
+ 149                  ÉäÍ¨µÀÊý¾Ý»ò½ÓÊÕ/·¢ËÍµØÖ·
+ 150          /**************************************************/
+ 151          uchar SPI_Write_Buf(uchar reg, uchar * pBuf, uchar bytes)
+ 152          {
+ 153   1              uchar status, i;
+ 154   1              CSN = 0;                    // CSNÖÃµÍ£¬¿ªÊ¼´«ÊäÊý¾Ý
+ 155   1              status = SPI_RW(reg);       // Ñ¡Ôñ¼Ä´æÆ÷£¬Í¬Ê±·µ»Ø×´Ì¬×Ö
+ 156   1              for(i=0; i<bytes; i++)
+ 157   1              SPI_RW(pBuf[i]);        // Öð¸ö×Ö½ÚÐ´ÈënRF24L01
+ 158   1              CSN = 1;                    // CSNÀ­¸ß£¬½áÊøÊý¾Ý´«Êä
+ 159   1              return(status);             // ·µ»Ø×´Ì¬¼Ä´æÆ÷
+ 160   1      }
+ 161          /**************************************************/
+ 162          
+ 163          /**************************************************
+ 164          º¯Êý£ºRX_Mode()
+ 165          
+ 166          ÃèÊö£º
+ 167              Õâ¸öº¯ÊýÉèÖÃnRF24L01Îª½ÓÊÕÄ£Ê½£¬µÈ´ý½ÓÊÕ·¢ËÍÉè±¸µÄÊý¾Ý°ü
+ 168          /**************************************************/
+ 169          void RX_Mode(void)
+ 170          {
+ 171   1                      CE = 0;
+ 172   1              SPI_Write_Buf(WRITE_REG + RX_ADDR_P0, TX_ADDRESS, TX_ADR_WIDTH);  // ½ÓÊÕÉè±¸½ÓÊÕÍ¨µÀ0Ê¹ÓÃºÍ·¢ËÍÉè±¸ÏàÍ
+             -¬µÄ·¢ËÍµØÖ·
+ 173   1              SPI_RW_Reg(WRITE_REG + EN_AA, 0x01);               // Ê¹ÄÜ½ÓÊÕÍ¨µÀ0×Ô¶¯Ó¦´ð
+ 174   1              SPI_RW_Reg(WRITE_REG + EN_RXADDR, 0x01);           // Ê¹ÄÜ½ÓÊÕÍ¨µÀ0
+ 175   1              SPI_RW_Reg(WRITE_REG + SETUP_AW, 0x02);                    //ÉèÖÃµØÖ·¿í¶È 1:0 00-ÎÞÐ§ 01-3×Ö½Ú 10-4×Ö½Ú 11 5×Ö½Ú
+ 176   1                      SPI_RW_Reg(WRITE_REG + RF_CH, 0);                 // Ñ¡ÔñÉäÆµÍ¨µÀ0x40
+ 177   1              SPI_RW_Reg(WRITE_REG + RX_PW_P0, TX_PLOAD_WIDTH);  // ½ÓÊÕÍ¨µÀ0Ñ¡ÔñºÍ·¢ËÍÍ¨µÀÏàÍ¬ÓÐÐ§Êý¾Ý¿í¶È
+ 178   1              SPI_RW_Reg(WRITE_REG + RF_SETUP, 0x0F);            // Êý¾Ý´«ÊäÂÊ1Mbps£¬·¢Éä¹¦ÂÊ0dBm£¬µÍÔëÉù·Å´óÆ÷ÔöÒæ
+C51 COMPILER V9.01   CONTROL                                                               06/10/2012 12:11:26 PAGE 4   
+
+ 179   1              SPI_RW_Reg(WRITE_REG + CONFIG, 0x0f);              // CRCÊ¹ÄÜ£¬16Î»CRCÐ£Ñé£¬ÉÏµç£¬½ÓÊÕÄ£Ê½
+ 180   1              CE = 1;                                            // À­¸ßCEÆô¶¯½ÓÊÕÉè±¸
+ 181   1              while(delay--);
+ 182   1              delay = 150;
+ 183   1      
+ 184   1      }
+ 185          /**************************************************/
+ 186          
+ 187          /**************************************************
+ 188          º¯Êý£ºTX_Mode()
+ 189          
+ 190          ÃèÊö£º
+ 191              Õâ¸öº¯ÊýÉèÖÃnRF24L01Îª·¢ËÍÄ£Ê½£¬£¨CE=1³ÖÐøÖÁÉÙ10us£©£¬
+ 192                  130usºóÆô¶¯·¢Éä£¬Êý¾Ý·¢ËÍ½áÊøºó£¬·¢ËÍÄ£¿é×Ô¶¯×ªÈë½ÓÊÕ
+ 193                  Ä£Ê½µÈ´ýÓ¦´ðÐÅºÅ¡£
+ 194          /**************************************************/
+ 195          void TX_Mode(uchar * BUF)
+ 196          {
+ 197   1              CE = 0;
+ 198   1              SPI_Write_Buf(WRITE_REG + TX_ADDR, TX_ADDRESS, TX_ADR_WIDTH);     // Ð´Èë·¢ËÍµØÖ·
+ 199   1              SPI_Write_Buf(WRITE_REG + RX_ADDR_P0, TX_ADDRESS, TX_ADR_WIDTH);  // ÎªÁËÓ¦´ð½ÓÊÕÉè±¸£¬½ÓÊÕÍ¨µÀ0µØÖ·ºÍ·
+             -¢ËÍµØÖ·ÏàÍ¬
+ 200   1              SPI_Write_Buf(WR_TX_PLOAD, BUF, TX_PLOAD_WIDTH);                  // Ð´Êý¾Ý°üµ½TX FIFO
+ 201   1              SPI_RW_Reg(WRITE_REG + EN_AA, 0x01);       // Ê¹ÄÜ½ÓÊÕÍ¨µÀ0×Ô¶¯Ó¦´ð
+ 202   1              SPI_RW_Reg(WRITE_REG + EN_RXADDR, 0x01);   // Ê¹ÄÜ½ÓÊÕÍ¨µÀ0
+ 203   1              SPI_RW_Reg(WRITE_REG + SETUP_AW, 0x02);         //ÉèÖÃµØÖ·¿í¶È 1:0 00-ÎÞÐ§ 01-3×Ö½Ú 10-4×Ö½Ú 11 5×Ö½Ú
+ 204   1              SPI_RW_Reg(WRITE_REG + SETUP_RETR, 0x0a);  // ×Ô¶¯ÖØ·¢ÑÓÊ±µÈ´ý250us+86us£¬×Ô¶¯ÖØ·¢10´Î
+ 205   1              SPI_RW_Reg(WRITE_REG + RF_CH, 0);         // Ñ¡ÔñÉäÆµÍ¨µÀ0x40
+ 206   1              SPI_RW_Reg(WRITE_REG + RF_SETUP, 0x0F);    // Êý¾Ý´«ÊäÂÊ2Mbps£¬·¢Éä¹¦ÂÊ0dBm£¬µÍÔëÉù·Å´óÆ÷ÔöÒæ
+ 207   1              SPI_RW_Reg(WRITE_REG + CONFIG, 0x0e);      // CRCÊ¹ÄÜ£¬16Î»CRCÐ£Ñé£¬ÉÏµç
+ 208   1              CE = 1;
+ 209   1              while(delay--);
+ 210   1              delay = 150;
+ 211   1      }
+ 212          /**************************************************/
+ 213          
+ 214          /**************************************************
+ 215          º¯Êý£ºCheck_ACK()
+ 216          
+ 217          ÃèÊö£º
+ 218              ¼ì²é½ÓÊÕÉè±¸ÓÐÎÞ½ÓÊÕµ½Êý¾Ý°ü£¬Éè¶¨Ã»ÓÐÊÕµ½Ó¦´ðÐÅ
+ 219                  ºÅÊÇ·ñÖØ·¢
+ 220          /**************************************************/
+ 221          uchar Check_ACK(bit clear)
+ 222          {
+ 223   1      //      send_string("µÈ´ýirqÖÐ¶Ï");
+ 224   1              while(IRQ);
+ 225   1      //      send_string("ÖÐ¶Ïºó");
+ 226   1              sta = SPI_Read(STATUS);
+ 227   1              //sta = SPI_RW(NOP);
+ 228   1              if(TX_DS)//Êý¾Ý·¢ËÍÍê³ÉÖÐ¶Ï¡£µ±Êý¾Ý·¢ËÍÍê³Éºó²úÉúÖÐ¶Ï¡£Èç¹û¹¤×÷ÔÚ×Ô¶¯Ó¦´ðÄ£Ê½ÏÂÖ»ÓÐµ±½ÓÊÕµ½Ó¦´ðÐÅºÅºóÖÃ1
+ 229   1                      send_char('T');
+ 230   1              else
+ 231   1                      send_char('F');                    // ·µ»Ø×´Ì¬¼Ä´æÆ÷
+ 232   1              if(MAX_RT){
+ 233   2                      if(clear){                                      // ÊÇ·ñÇå³ýTX FIFO£¬Ã»ÓÐÇå³ýÔÚ¸´Î»MAX_RTÖÐ¶Ï±êÖ¾ºóÖØ·¢
+ 234   3                      send_string("MAX");
+ 235   3                      send_char(SPI_Read(OBSERVE_TX));                     
+ 236   3                              SPI_RW(FLUSH_TX);
+ 237   3                      }
+ 238   2              }
+ 239   1              SPI_RW_Reg(WRITE_REG + STATUS, sta);  // Çå³ýTX_DS»òMAX_RTÖÐ¶Ï±êÖ¾
+C51 COMPILER V9.01   CONTROL                                                               06/10/2012 12:11:26 PAGE 5   
+
+ 240   1              IRQ = 1;   
+ 241   1              if(TX_DS)//Êý¾Ý·¢ËÍÍê³ÉÖÐ¶Ï¡£µ±Êý¾Ý·¢ËÍÍê³Éºó²úÉúÖÐ¶Ï¡£Èç¹û¹¤×÷ÔÚ×Ô¶¯Ó¦´ðÄ£Ê½ÏÂÖ»ÓÐµ±½ÓÊÕµ½Ó¦´ðÐÅºÅºóÖÃ1
+ 242   1                      return(0x54);
+ 243   1              else
+ 244   1                      return(0x46);
+ 245   1      }
+ 246          /**************************************************/
+ 247          
+ 248          /**************************************************
+ 249          º¯Êý£ºCheckButtons()
+ 250          
+ 251          ÃèÊö£º
+ 252              ¼ì²é°´¼üÊÇ·ñ°´ÏÂ£¬°´ÏÂÔò·¢ËÍÒ»×Ö½ÚÊý¾Ý
+ 253          /**************************************************/
+ 254          void CheckButtons()
+ 255          {
+ 256   1      
+ 257   1                              //TX_BUF[0] = DATA;          // Êý¾ÝËÍµ½»º´æ
+ 258   1                              TX_Mode(TX_BUF);                        // °ÑnRF24L01ÉèÖÃÎª·¢ËÍÄ£Ê½²¢·¢ËÍÊý¾Ý
+ 259   1                              //LED = ~DATA;                  // Êý¾ÝËÍµ½LEDÏÔÊ¾
+ 260   1                              send_char(Check_ACK(1));               // µÈ´ý·¢ËÍÍê±Ï£¬Çå³ýTX FIFO
+ 261   1                              //delay_ms(250);
+ 262   1                              //delay_ms(250);
+ 263   1                              //LED = 0xff;                           // ¹Ø±ÕLED
+ 264   1                              RX_Mode();                              // ÉèÖÃÎª½ÓÊÕÄ£Ê½
+ 265   1                              //while(!(P3 & 0x01));
+ 266   1                              //DATA <<= 1;
+ 267   1                              //if(!DATA)
+ 268   1                              //      DATA = 0x26;
+ 269   1              
+ 270   1      }
+ 271          /**************************************************/
+ 272          
+ 273          /**************************************************
+ 274          º¯Êý£ºmain()
+ 275          
+ 276          ÃèÊö£º
+ 277              Ö÷º¯Êý
+ 278          /**************************************************/
+ 279          void main(void)
+ 280          {
+ 281   1              uart_init();
+ 282   1              init_io();                            // ³õÊ¼»¯IO
+ 283   1              RX_Mode();      
+ 284   1              send_string("uart init over!"); 
+ 285   1              while(1)
+ 286   1              {
+ 287   2                       
+ 288   2                      while(RI)
+ 289   2                      {
+ 290   3                              
+ 291   3                              cmd = read_char();
+ 292   3                              send_char(cmd);
+ 293   3                              if(cmd==0x28){
+ 294   4                                      TX_BUF[loop]=cmd;
+ 295   4                                      loop++;
+ 296   4                                      while(RI)
+ 297   4                                      {
+ 298   5                                         TX_BUF[loop] =       read_char();
+ 299   5                                         send_char(TX_BUF[loop]);
+ 300   5                                         loop++;
+ 301   5                                      }
+C51 COMPILER V9.01   CONTROL                                                               06/10/2012 12:11:26 PAGE 6   
+
+ 302   4                                      if(TX_BUF[4]==0x29)
+ 303   4                                      {
+ 304   5                                              CheckButtons();
+ 305   5                                      }       
+ 306   4                              } loop=0;   
+ 307   3                      }
+ 308   2                      
+ 309   2                sta = SPI_Read(STATUS);         // ¶Á×´Ì¬¼Ä´æÆ÷
+ 310   2                if(RX_DR)                               // ÅÐ¶ÏÊÇ·ñ½ÓÊÜµ½Êý¾Ý
+ 311   2                      {
+ 312   3                              //send_string("ÊÕµ½Êý¾Ý");
+ 313   3                              //send_char('&');
+ 314   3                              SPI_Read_Buf(RD_RX_PLOAD, RX_BUF, TX_PLOAD_WIDTH);  // ´ÓRX FIFO¶Á³öÊý¾Ý
+ 315   3      
+ 316   3                              /*send_char('|');
+ 317   3                              send_char(RX_BUF[0]);
+ 318   3                              send_char(RX_BUF[1]);
+ 319   3                              send_char(RX_BUF[2]);
+ 320   3                              send_char(RX_BUF[3]);
+ 321   3                              send_char(RX_BUF[4]);
+ 322   3                              send_char('|');  */
+ 323   3                              turn=0;
+ 324   3                              if(RX_BUF[1]==0x77){
+ 325   4                                      p11=1;p13=1;
+ 326   4                                      //send_char('w');
+ 327   4                              }else if(RX_BUF[1]==0x73){
+ 328   4                                      p11=0;p13=0;
+ 329   4                                      //send_char('s');
+ 330   4                              }else if(RX_BUF[1]==0x6E){
+ 331   4                                      //send_char('n');
+ 332   4                                      p10=0;p12=0;
+ 333   4                                      turn=1; 
+ 334   4                              }
+ 335   3                                      left = RX_BUF[2];
+ 336   3                                      right = RX_BUF[3];
+ 337   3                              flag = 1;
+ 338   3                      }else{
+ 339   3                              error++;
+ 340   3                              if(error>10000)
+ 341   3                              {
+ 342   4                                      init_io();
+ 343   4                                      RX_Mode();
+ 344   4                                      error = 0;
+ 345   4                              }
+ 346   3                      }
+ 347   2                      SPI_RW_Reg(WRITE_REG + STATUS, sta);  // Çå³ýRX_DSÖÐ¶Ï±êÖ¾
+ 348   2                      
+ 349   2                      
+ 350   2                      if(turn){
+ 351   3                              continue;}
+ 352   2                      
+ 353   2                      while(count)
+ 354   2                      {
+ 355   3                              if(count<right)
+ 356   3                                      p10=1;
+ 357   3                              else
+ 358   3                                      p10=0;
+ 359   3                              if(count<left)
+ 360   3                                      p12=1;
+ 361   3                              else
+ 362   3                                      p12=0;
+ 363   3                              count--;
+C51 COMPILER V9.01   CONTROL                                                               06/10/2012 12:11:26 PAGE 7   
+
+ 364   3                      }
+ 365   2                      count=100;
+ 366   2                      
+ 367   2              }
+ 368   1      }
+ 369          /********************NRF24L10³ÌÐò½áÊø******************************/
+ 370          
+ 371          /**************************************************
+ 372          º¯Êý£ºmain()
+ 373          
+ 374          ÃèÊö£º
+ 375              Ö÷º¯Êý
+ 376          /*************************************************
+ 377          
+ 378          //µç»úÕý×ª£ºDIR=1 PWM=PWM
+ 379          //DIR=0 PWM=PWM
+ 380          //DIR=X PWM=0
+ 381          void main2()
+ 382          {
+ 383                  P0 = 0;
+ 384                  P1 = 0;
+ 385                  P2 = 0;
+ 386                  //P3 = 0;
+ 387                  uart_init();
+ 388                  init_io();                            // ³õÊ¼»¯IO
+ 389                  RX_Mode();
+ 390                  send_string("uart init over!");
+ 391                  while(1){
+ 392          
+ 393                          if(RI)
+ 394                          {
+ 395                                  cmd = read_char();
+ 396                                  if(cmd==0x28)
+ 397                                  {
+ 398                                          TX_BUF[0]=cmd;
+ 399                                          send_char(TX_BUF[0]);
+ 400                                          while(!RI);
+ 401                                          TX_BUF[1]=      read_char();
+ 402                                          send_char(TX_BUF[1]);
+ 403                                          while(!RI);
+ 404                                          TX_BUF[2]=read_char();
+ 405                                          send_char(TX_BUF[2]);
+ 406                                          while(!RI);
+ 407                                          TX_BUF[3]=read_char();
+ 408                                          send_char(TX_BUF[3]);
+ 409                                          while(!RI);
+ 410                                          TX_BUF[4]=read_char();
+ 411                                          send_char(TX_BUF[4]);
+ 412                                          CheckButtons();           // ·¢ËÍÊý¾Ý
+ 413                                  }
+ 414                          }
+ 415          
+ 416                          if(RX_DR)                                 // ÅÐ¶ÏÊÇ·ñ½ÓÊÜµ½Êý¾Ý
+ 417                          {
+ 418                                  //send_string("ÊÕµ½Êý¾Ý");
+ 419                                  send_char('&');
+ 420                                  SPI_Read_Buf(RD_RX_PLOAD, RX_BUF, TX_PLOAD_WIDTH);  // ´ÓRX FIFO¶Á³öÊý¾Ý
+ 421                                  flag = 1;
+ 422                          }
+ 423                          SPI_RW_Reg(WRITE_REG + STATUS, sta);  // Çå³ýRX_DSÖÐ¶Ï±êÖ¾
+ 424                          if(flag)                           // ½ÓÊÜÍê³É
+ 425                          {
+C51 COMPILER V9.01   CONTROL                                                               06/10/2012 12:11:26 PAGE 8   
+
+ 426                                  flag = 0;                      // Çå±êÖ¾
+ 427                                  send_char(RX_BUF[0]);
+ 428                                  send_char(';');
+ 429          
+ 430                                  turn=0;
+ 431                                  if(RX_BUF[1]==0x77){
+ 432                                          p11=1;p13=1;
+ 433                                          //send_char('w');
+ 434                                  }else if(RX_BUF[1]==0x73){
+ 435                                          p11=0;p13=0;
+ 436                                          //send_char('s');
+ 437                                  }else if(RX_BUF[1]==0x6E){
+ 438                                          //send_char('n');
+ 439                                          p10=0;p12=0;
+ 440                                          turn=1; 
+ 441                                  }
+ 442                                          left = RX_BUF[2];
+ 443                                          right = RX_BUF[3];
+ 444                          }
+ 445                                  
+ 446                                  
+ 447                          if(turn)
+ 448                                  continue;
+ 449                          
+ 450                          while(count)
+ 451                          {
+ 452                                  if(count<right)
+ 453                                          p10=1;
+ 454                                  else
+ 455                                          p10=0;
+ 456                                  if(count<left)
+ 457                                          p12=1;
+ 458                                  else
+ 459                                          p12=0;
+ 460                                  count--;
+ 461                          }
+ 462                          count=100;
+ 463                  }
+ 464          }               */
+ 465          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    777    ----
+   CONSTANT SIZE    =     24    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     57      16
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----       1
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

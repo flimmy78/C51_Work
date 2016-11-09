@@ -1,0 +1,53 @@
+<html>
+<body>
+<pre>
+<h1>礦ision Build Log</h1>
+<h2>Project:</h2>
+D:\光盘\RZ-51V20开发板配套视频教程\xiancheng\xiancheng.uvproj
+Project File Date:  07/02/2011
+
+<h2>Output:</h2>
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling Text1.c...
+TEXT1.C(253): warning C280: 'i': unreferenced local variable
+TEXT1.C(253): warning C280: 'l': unreferenced local variable
+TEXT1.C(255): warning C280: 'k': unreferenced local variable
+TEXT1.C(72): warning C290: missing return value
+linking...
+Program Size: data=28.2 xdata=0 code=705
+creating hex file from "xiancheng"...
+"xiancheng" - 0 Error(s), 4 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling Text1.c...
+TEXT1.C(253): warning C280: 'i': unreferenced local variable
+TEXT1.C(253): warning C280: 'l': unreferenced local variable
+TEXT1.C(255): warning C280: 'k': unreferenced local variable
+TEXT1.C(72): warning C290: missing return value
+linking...
+Program Size: data=28.2 xdata=0 code=705
+creating hex file from "xiancheng"...
+"xiancheng" - 0 Error(s), 4 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling Text1.c...
+TEXT1.C(253): warning C280: 'i': unreferenced local variable
+TEXT1.C(253): warning C280: 'l': unreferenced local variable
+TEXT1.C(255): warning C280: 'k': unreferenced local variable
+TEXT1.C(72): warning C290: missing return value
+linking...
+Program Size: data=28.2 xdata=0 code=705
+creating hex file from "xiancheng"...
+"xiancheng" - 0 Error(s), 4 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling Text1.c...
+TEXT1.C(253): warning C280: 'i': unreferenced local variable
+TEXT1.C(253): warning C280: 'l': unreferenced local variable
+TEXT1.C(255): warning C280: 'k': unreferenced local variable
+TEXT1.C(72): warning C290: missing return value
+linking...
+Program Size: data=28.2 xdata=0 code=708
+creating hex file from "xiancheng"...
+"xiancheng" - 0 Error(s), 4 Warning(s).

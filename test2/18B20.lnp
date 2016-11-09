@@ -1,0 +1,4 @@
+"STARTUP.obj",
+"18B20TEST.obj" 
+TO "18B20" 
+RAMSIZE(256) 

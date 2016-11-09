@@ -1,0 +1,51 @@
+C51 COMPILER V9.01   UART                                                                  06/23/2015 22:05:20 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE UART
+OBJECT MODULE PLACED IN uart.OBJ
+COMPILER INVOKED BY: D:\Program files\Keil\C51\BIN\C51.EXE uart.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+*** WARNING C500 IN LINE 1 OF UART.C: LICENSE ERROR (R208: RENEW LICENSE ID CODE (LIC))
+
+   1          #include<reg52.h>
+   2          #include<intrins.h>
+   3          #include<uart.h>
+   4          uint text[]={0xC0,0xEE,0xD2,0xA2,0xA3,0xBA,0x00};
+   5          uint i;
+   6          uchar tem;
+   7          
+   8          void main()
+   9          {
+  10   1              uart_init();
+  11   1              send_string("ÎÒµÄ¶î¶î¶î");                                       
+  12   1              while(1)
+  13   1              {
+  14   2                      
+  15   2                      send_string(text);
+*** WARNING C182 IN LINE 15 OF UART.C: pointer to different objects
+  16   2                      while(RI)
+  17   2                      {
+  18   3                              tem=read_char();
+  19   3      
+  20   3                              send_char(tem);
+  21   3                      }
+  22   2                      
+  23   2                      
+  24   2              }
+  25   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    116    ----
+   CONSTANT SIZE    =     11    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     19       3
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  2 WARNING(S),  0 ERROR(S)

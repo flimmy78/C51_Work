@@ -1,0 +1,18 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Project:</h2>
+D:\ÎÒµÄÎÄµµ\C51 Work\test2\18B20.uvproj
+Project File Date:  07/15/2011
+
+<h2>Output:</h2>
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling 18B20TEST.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?CO?18B20TEST
+Program Size: data=9.0 xdata=0 code=30
+creating hex file from "18B20"...
+"18B20" - 0 Error(s), 1 Warning(s).

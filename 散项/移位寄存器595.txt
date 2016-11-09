@@ -1,0 +1,26 @@
+	sbit  ST_CLK=P2^7;
+	sbit  SH_CLK=P2^6;
+	sbit  MOSIO=P2^0;
+	
+	send_data(unsigned char dat){
+	unsigned char i;
+	for(i=0;i<8;i++)
+	{
+		if(i==0){//如果第一次就不要移位了 直接读取第一位
+		  MOSIO=dat&0x80;
+		}else if(((dat<<=1)&0x80)==0)//除了第一次可以移位
+		{
+			MOSIO=0;
+		}else{
+			MOSIO=1;
+		}
+		SH_CLK=0;
+		_nop_();
+		_nop_();
+		SH_CLK=1; 		
+	}
+	 ST_CLK=0;
+	 _nop_();
+	 _nop_();
+  	 ST_CLK=1;	
+}//拉低OE SH_CLK下降沿开始移位读取 最后ST_CLK下降沿并出

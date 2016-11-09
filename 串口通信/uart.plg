@@ -1,0 +1,17 @@
+<html>
+<body>
+<pre>
+<h1>礦ision Build Log</h1>
+<h2>Project:</h2>
+D:\我的文档\C51 Work\串口通信\uart.uvproj
+Project File Date:  06/23/2015
+
+<h2>Output:</h2>
+Build target 'Target 1'
+compiling uart.c...
+UART.C(1): warning C500: LICENSE ERROR (R208: RENEW LICENSE ID CODE (LIC))
+UART.C(15): warning C182: pointer to different objects
+linking...
+Program Size: data=31.0 xdata=0 code=336
+creating hex file from "uart"...
+"uart" - 0 Error(s), 2 Warning(s).

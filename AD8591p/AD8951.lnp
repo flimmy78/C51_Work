@@ -1,0 +1,4 @@
+"STARTUP.obj",
+"PCF8591.obj" 
+TO "AD8951" 
+RAMSIZE(256) 

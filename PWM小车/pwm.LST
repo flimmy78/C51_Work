@@ -1,0 +1,97 @@
+C51 COMPILER V8.05a   PWM                                                                  05/27/2012 23:44:30 PAGE 1   
+
+
+C51 COMPILER V8.05a, COMPILATION OF MODULE PWM
+OBJECT MODULE PLACED IN pwm.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE pwm.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include <reg52.h>        //  包含51单片机寄存器定义的头文件
+   2          #include <intrins.h>      //包含_nop_()函数定义的头文件
+   3          #include <uart.h>
+   4          sbit p10 = P1^0;
+   5          sbit p11 = P1^1;
+   6          sbit p12 = P1^2;
+   7          sbit p13 = P1^3;
+   8          uchar has = 0;
+   9          uchar nul = 0;
+  10          uchar i1;
+  11          uchar j;
+  12          uint count=1000;
+  13          //电机正转：DIR=1 PWM=PWM
+  14          //DIR=0 PWM=PWM
+  15          //DIR=X PWM=0
+  16          
+  17          void setPWM(uchar val)
+  18          {
+  19   1               has = val;
+  20   1               nul = 100-has;
+  21   1      }
+  22          void main()
+  23          {
+  24   1              //P1=11111100;
+  25   1              //uart_init();
+  26   1              setPWM(40);
+  27   1              while(count)
+  28   1              {
+  29   2                      p11=1;p13=1;p10=1;p12=1;
+  30   2                      for(i1=0;i1<has;i1++)
+  31   2                      {;}
+  32   2                      p11=0;p13=0;
+  33   2                      for(j=0;j<nul;j++)
+  34   2                      {;}
+  35   2                      count--;
+  36   2              }
+  37   1              count=2000;
+  38   1              while(count)
+  39   1              {
+  40   2                      p11=1;p13=1;p10=0;p12=1;
+  41   2                      for(i1=0;i1<has;i1++)
+  42   2                      {;}
+  43   2                      p11=0;p13=0;
+  44   2                      for(j=0;j<nul;j++)
+  45   2                      {;}
+  46   2                      count--;
+  47   2              }
+  48   1              count=1000;     
+  49   1                      while(count)
+  50   1              {
+  51   2                      p11=1;p13=1;p10=1;p12=1;
+  52   2                      for(i1=0;i1<has;i1++)
+  53   2                      {;}
+  54   2                      p11=0;p13=0;
+  55   2                      for(j=0;j<nul;j++)
+C51 COMPILER V8.05a   PWM                                                                  05/27/2012 23:44:30 PAGE 2   
+
+  56   2                      {;}
+  57   2                      count--;
+  58   2              }
+  59   1              count=1400;
+  60   1              while(count)
+  61   1              {
+  62   2                      p11=1;p13=1;p10=1;p12=0;
+  63   2                      for(i1=0;i1<has;i1++)
+  64   2                      {;}
+  65   2                      p11=0;p13=0;
+  66   2                      for(j=0;j<nul;j++)
+  67   2                      {;}
+  68   2                      count--;
+  69   2              }
+  70   1              count=1000;
+  71   1      }
+  72          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    343    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      8    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

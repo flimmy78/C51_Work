@@ -1,0 +1,143 @@
+C51 COMPILER V8.02   TEXT3                                                                 06/29/2011 23:34:10 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE TEXT3
+OBJECT MODULE PLACED IN Text3.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Text3.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include <reg51.h>
+   2          #include <intrins.h>
+   3          unsigned char code table[]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90};//定义共阳数码管显示字型码 
+   4          
+   5          #define OP_READ 0xa1            // 器件地址以及读取操作,0xa1即为1010 0001B
+   6          #define OP_WRITE 0xa0           // 器件地址以及写入操作,0xa1即为1010 0000B
+   7          
+   8          sbit  Sclock = P3^2;
+   9          sbit  Sdata = P3^3;
+  10          
+  11          
+  12          void WriteCurrent(unsigned char y)
+  13          {
+  14   1              unsigned char i;
+  15   1              for(i = 0; i < 8; i++)          // 循环移入8个位
+  16   1              {
+  17   2              Sdata = (bit)(y&0x80);   //通过按位“与”运算将最高位数据送到S
+  18   2                                                        //因为传送时高位在前，低位在后
+  19   2                      _nop_();            //等待一个机器周期   
+  20   2                 Sclock = 1;            //在SCL的上升沿将数据写入AT24Cxx      
+  21   2              _nop_();            //等待一个机器周期 
+  22   2                _nop_();             //等待一个机器周期       
+  23   2                      
+  24   2                      Sclock = 0;            //将SCL重新置为低电平，以在SCＬ线形成传送数据所需的８个脉冲
+  25   2                      y <<= 1;           //将y中的各二进位向左移一位
+  26   2                     
+  27   2              }
+  28   1      }
+  29          
+  30          
+  31          
+  32          
+  33          void sleep()
+  34          {
+  35   1              _nop_();
+  36   1              _nop_();
+  37   1              _nop_();
+  38   1              _nop_();
+  39   1              _nop_();
+  40   1      }
+  41          void main()
+  42          {
+  43   1      
+  44   1              
+  45   1      }
+  46          void start()
+  47          {
+  48   1               Sclock = 1;
+  49   1               Sdata = 1;
+  50   1               sleep();
+  51   1               Sclock = 0;
+  52   1               sleep();
+  53   1               Sclock = 0;    //SCL为低电平时，SDA上数据才允许变化(即允许以后的数据传递）
+  54   1      }
+  55          
+C51 COMPILER V8.02   TEXT3                                                                 06/29/2011 23:34:10 PAGE 2   
+
+  56          void control()
+  57          {
+  58   1              
+  59   1      }
+  60          
+  61          
+  62          void stop()// 停止位
+  63          {
+  64   1              Sdata = 0;     //SDA初始化为低电平“0” _n
+  65   1              Sclock = 1;     //结束数据传送时，要求SCL为高电平“1”
+  66   1              sleep();
+  67   1              Sdata = 1;    //SDA的上升沿被认为是结束信号
+  68   1              sleep();
+  69   1              Sdata=0;
+  70   1              Sclock=0;
+  71   1      }
+  72          
+  73          
+  74          bit Ask()                  
+  75          {
+  76   1            bit ack_bit;        //储存应答位 
+  77   1              Sdata = 1;       // 发送设备（主机）应在时钟脉冲的高电平期间(SCL=1)释放SDA线，
+  78   1                              //以让SDA线转由接收设备(AT24Cxx)控制
+  79   1              _nop_();        //等待一个机器周期 
+  80   1              _nop_();        //等待一个机器周期 
+  81   1              Sclock = 1;       //根据上述规定，SCL应为高电平
+  82   1              sleep();
+  83   1              ack_bit = Sdata; //接受设备（AT24Cxx)向SDA送低电平，表示已经接收到一个字节
+  84   1                             //若送高电平，表示没有接收到，传送异常 结束发送
+  85   1              Sclock = 0;       //SCL为低电平时，SDA上数据才允许变化(即允许以后的数据传递）
+  86   1              return  ack_bit;                        // 返回AT24Cxx应答位
+  87   1      
+  88   1      
+  89   1      
+  90   1      }
+  91          
+  92          unsigned char ReadData()
+  93          // 从AT24Cxx移入数据到MCU
+  94          {
+  95   1              unsigned char i;
+  96   1              unsigned char x;   //储存从AT24Cxx中读出的数据
+  97   1              for(i = 0; i < 8; i++)
+  98   1              {
+  99   2                      Sclock = 1;                //SCL置为高电平
+ 100   2                      x<<=1;                  //将x中的各二进位向左移一位
+ 101   2                      x|=(unsigned char)Sdata;  //将SDA上的数据通过按位“或“运算存入x中
+ 102   2                      Sclock = 0;                        //在SCL的下降沿读出数据
+ 103   2              }
+ 104   1              return(x);                //将读取的数据返回
+ 105   1      }
+ 106          
+ 107            unsigned char ReadCurrent()
+ 108          {
+ 109   1              unsigned char x;
+ 110   1              start();               //开始数据传递
+ 111   1              WriteCurrent(OP_READ);   //选择要操作的AT24Cxx芯片，并告知要读其数据
+ 112   1              Ask();
+ 113   1              x=ReadData();         //将读取的数据存入x
+ 114   1              stop();                //停止数据传递
+ 115   1              return x;              //返回读取的数据
+ 116   1      }
+
+C51 COMPILER V8.02   TEXT3                                                                 06/29/2011 23:34:10 PAGE 3   
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    119    ----
+   CONSTANT SIZE    =     10    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----       1
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

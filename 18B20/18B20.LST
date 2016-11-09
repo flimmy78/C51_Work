@@ -1,0 +1,233 @@
+C51 COMPILER V9.01   18B20                                                                 07/04/2011 11:00:58 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE 18B20
+OBJECT MODULE PLACED IN 18B20.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE 18B20.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include <reg52.h>        //  包含51单片机寄存器定义的头文件
+   2          #include <intrins.h>      //包含_nop_()函数定义的头文件
+   3          unsigned char code table[]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90};//定义共阳数码管显示字型码 
+   4          #define uchar unsigned char
+   5          #define uint  unsigned int
+   6          sbit fmq=P3^6;
+   7           sbit jdq=P3^7;
+   8          sbit DQ = P3^3;
+   9          uchar time;
+  10          uchar hei;
+  11          uchar low;
+  12          unsigned char flag,tltemp;
+  13          void delay500us()
+  14          {
+  15   1      
+  16   1      unsigned char j;
+  17   1      
+  18   1       for(j=0;j<57;j++)        //500us基准延时程序 
+  19   1       {
+  20   2        ;
+  21   2       } 
+  22   1      }
+  23          
+  24          void beep()     //产生1KHZ频率声音的函数
+  25          {
+  26   1              fmq=0;
+  27   1              delay500us();
+  28   1              fmq=1;
+  29   1              delay500us();   
+  30   1      
+  31   1      }
+  32           
+  33                  void delay1ms()
+  34          {
+  35   1         unsigned char i,j;   
+  36   1               for(i=0;i<4;i++)
+  37   1                for(j=0;j<33;j++)
+  38   1                 ;             
+  39   1       }
+  40          
+  41           void delaynms(unsigned char n)
+  42           {
+  43   1         unsigned char i;
+  44   1              for(i=0;i<n;i++)
+  45   1                 delay1ms();
+  46   1       }
+  47          
+  48           void display_temp1(unsigned char x)
+  49          {
+  50   1                                unsigned char i=255;
+  51   1       unsigned char j,k,l;     //j,k,l分别储存温度的百位、十位和个位
+  52   1                      j=x/100;
+  53   1                      k=(x%100)/10;
+  54   1                      l=x%10; 
+  55   1                      if(k>=3&&l>=1)
+C51 COMPILER V9.01   18B20                                                                 07/04/2011 11:00:58 PAGE 2   
+
+  56   1                      jdq=0;
+  57   1                      else
+  58   1                      jdq=1;
+  59   1      
+  60   1              while(i--){
+  61   2                                    //取百位
+  62   2                      P0=table[j];
+  63   2                      P2=0xfe;
+  64   2                      delaynms(5);
+  65   2                       
+  66   2                      P0=table[k];
+  67   2                      P2=0xfd;
+  68   2                      delaynms(5);
+  69   2                      
+  70   2                      P0=table[l];
+  71   2                      P2=0xfb; 
+  72   2                      delaynms(5);
+  73   2                        if(k>=3&&l>=1)
+  74   2                      beep();
+  75   2              }
+  76   1              
+  77   1              P2=0xff;
+  78   1              
+  79   1      }
+  80          
+  81          bit start()
+  82          {
+  83   1              bit res = 1;
+  84   1      
+  85   1              DQ=1;
+  86   1              _nop_();
+  87   1              _nop_();
+  88   1              _nop_();
+  89   1              _nop_();
+  90   1              _nop_();
+  91   1      
+  92   1              DQ=0;
+  93   1              for(time=0;time<240;time++);
+  94   1              DQ=1;
+  95   1              for(time=0;time<10;time++);
+  96   1              res=DQ;
+  97   1              /* if(DQ==0)
+  98   1              {
+  99   1                      P0=table[0];
+ 100   1                      P2=0;
+ 101   1                      
+ 102   1              }else
+ 103   1              {
+ 104   1                      P0=table[1];
+ 105   1                      P2=0;
+ 106   1                      
+ 107   1              }
+ 108   1              while(1);  */
+ 109   1              
+ 110   1              for(time=0;time<50;time++);
+ 111   1                
+ 112   1              return res;
+ 113   1      }
+ 114                    
+ 115          uchar read()
+ 116          {
+ 117   1              uchar dats;
+C51 COMPILER V9.01   18B20                                                                 07/04/2011 11:00:58 PAGE 3   
+
+ 118   1              uchar i=8;
+ 119   1              while(i--){
+ 120   2                      DQ=1;
+ 121   2                      _nop_();
+ 122   2                      DQ=0;
+ 123   2                      _nop_();
+ 124   2                      DQ=1;
+ 125   2                      for(time=0;time<3;time++);
+ 126   2                      dats>>=1;
+ 127   2                         if(DQ==1)
+ 128   2                            dats|=0x80;  //如果读到的数据是1，则将1存入dat
+ 129   2                              else
+ 130   2                                      dats|=0x00;//如果读到的数据是0，则将0存入dat
+ 131   2                  for(time=0;time<17;time++);
+ 132   2      
+ 133   2              }
+ 134   1              return dats;
+ 135   1      }
+ 136          
+ 137          void write(uchar dats)
+ 138          {               
+ 139   1              uchar i=8;
+ 140   1              while(i--){
+ 141   2                      DQ=1;
+ 142   2                      _nop_();
+ 143   2                      DQ=0;
+ 144   2                      _nop_();
+ 145   2                      DQ=(bit)(dats&0x01);
+ 146   2                      dats>>=1;
+ 147   2                      for(time=0;time<5;time++);
+ 148   2                      DQ=1;
+ 149   2                      for(time=0;time<15;time++);
+ 150   2              }
+ 151   1      }
+ 152          
+ 153          void main()
+ 154          {
+ 155   1              unsigned char TL;     //储存暂存器的温度低位
+ 156   1                unsigned char TH;    //储存暂存器的温度高位
+ 157   1            unsigned char TN;      //储存温度的整数部分
+ 158   1                unsigned char TD;       //储存温度的小数部分
+ 159   1              while(1)
+ 160   1              {
+ 161   2                      if(start())
+ 162   2                              return;
+ 163   2                       write(0xCC);
+ 164   2                       write(0x44);
+ 165   2                       delaynms(200);
+ 166   2              
+ 167   2                              if(start())
+ 168   2                              return;
+ 169   2                       write(0xCC);
+ 170   2                       write(0xBE);
+ 171   2                       
+ 172   2      
+ 173   2                        TL=read();    //先读的是温度值低位
+ 174   2                      TH=read();    //接着读的是温度值高位
+ 175   2                      P0=table[0];
+ 176   2                      P2=TL;  
+ 177   2                      
+ 178   2                      if((TH&0xf8)!=0x00)//判断高五位 得到温度正负标志
+ 179   2                      {
+C51 COMPILER V9.01   18B20                                                                 07/04/2011 11:00:58 PAGE 4   
+
+ 180   3                              flag=1;
+ 181   3                              TL=~TL;  //取反
+ 182   3                              TH=~TH;   //取反
+ 183   3                              tltemp=TL+1; //低位加1
+ 184   3                              TL=tltemp;
+ 185   3                              if(tltemp>255) TH++;  //如果低8位大于255，向高8位进1
+ 186   3                         TN=TH*16+TL/16;      //实际温度值=(TH*256+TL)/16,即：TH*16+TL/16
+ 187   3                                                                                //这样得出的是温度的整数部分,小数部分被丢弃了
+ 188   3                         TD=(TL%16)*10/16;    //计算温度的小数部分,将余数乘以10再除以16取整，
+ 189   3                      }
+ 190   2                      TN=TH*16+TL/16;      //实际温度值=(TH*256+TL)/16,即：TH*16+TL/16
+ 191   2                                                        //这样得出的是温度的整数部分,小数部分被丢弃了
+ 192   2                 TD=(TL%16)*10/16;    //计算温度的小数部分,将余数乘以10再除以16取整，
+ 193   2                                                //这样得到的是温度小数部分的第一位数字(保留1位小数)
+ 194   2                 display_temp1(TN);    //显示温度的整数部分
+ 195   2               //  display_temp2(TD);    //显示温度的小数部分
+ 196   2            delaynms(10);               
+ 197   2          }
+ 198   1                      // P0=table[0];
+ 199   1                      // P2=hei;  
+ 200   1               
+ 201   1                
+ 202   1      
+ 203   1      
+ 204   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    487    ----
+   CONSTANT SIZE    =     10    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      5       5
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----       1
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
